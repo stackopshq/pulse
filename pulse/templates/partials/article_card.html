@@ -1,0 +1,30 @@
+{% set a = item.article %}
+{% set s = item.source %}
+{% set st = item.state %}
+{% set is_read = st.is_read if st else False %}
+{% set is_fav = st.is_favorite if st else False %}
+<article class="card {% if is_read %}read{% endif %}" id="article-{{ a.id }}">
+    <div class="card-main">
+        <div class="card-meta">
+            <span class="src">{{ s.title }}</span>
+            <span class="dot">·</span>
+            <span class="muted">{{ a.published_at | timeago }}</span>
+        </div>
+        <a class="card-title" href="/articles/{{ a.id }}">{{ a.title }}</a>
+        {% if a.summary %}
+        <p class="card-summary">{{ a.summary | striptags | truncate(220) }}</p>
+        {% endif %}
+    </div>
+    <div class="card-actions">
+        <button class="icon-btn {% if is_fav %}fav-on{% endif %}"
+                title="Favori"
+                hx-post="/articles/{{ a.id }}/favorite"
+                hx-target="#article-{{ a.id }}"
+                hx-swap="outerHTML">★</button>
+        <button class="icon-btn"
+                title="{% if is_read %}Marquer non lu{% else %}Marquer lu{% endif %}"
+                hx-post="/articles/{{ a.id }}/read"
+                hx-target="#article-{{ a.id }}"
+                hx-swap="outerHTML">{% if is_read %}◌{% else %}●{% endif %}</button>
+    </div>
+</article>

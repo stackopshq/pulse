@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% set active = 'categories' %}
+{% block title %}Catégories — Pulse{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Catégories</h1></header>
+
+<form action="/categories" method="post" class="add-source">
+    <input type="text" name="name" placeholder="Nom de la catégorie" required>
+    <input type="color" name="color" value="#6366f1" class="color-input">
+    <button type="submit" class="btn btn-primary">Ajouter</button>
+</form>
+
+{% if categories %}
+<div class="cat-grid">
+    {% for c in categories %}
+    <div class="cat-card">
+        <span class="tag" style="--tag:{{ c.color }}">{{ c.name }}</span>
+        <span class="muted small">{{ counts.get(c.id, 0) }} source(s)</span>
+        <form action="/categories/{{ c.id }}/delete" method="post" class="inline"
+              onsubmit="return confirm('Supprimer cette catégorie ?')">
+            <button class="link-btn danger">Supprimer</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty"><p>Aucune catégorie.</p></div>
+{% endif %}
+{% endblock %}

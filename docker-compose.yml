@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pulse
+      POSTGRES_PASSWORD: pulse
+      POSTGRES_DB: pulse
+    volumes:
+      - pulse_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulse"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PULSE_DATABASE_URL: postgresql+psycopg://pulse:pulse@db:5432/pulse
+      PULSE_SECRET_KEY: ${PULSE_SECRET_KEY:-change-me-in-production}
+      PULSE_FETCH_INTERVAL_MINUTES: ${PULSE_FETCH_INTERVAL_MINUTES:-30}
+    ports:
+      - "8000:8000"
+
+volumes:
+  pulse_pgdata:

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% set active = 'favorites' if status == 'favorites' else 'articles' %}
+{% block title %}Articles — Pulse{% endblock %}
+{% block content %}
+<header class="page-head">
+    <h1>{% if status == 'favorites' %}Favoris{% else %}Articles{% endif %}</h1>
+</header>
+
+<form id="filters"
+      hx-get="/articles"
+      hx-target="#article-list"
+      hx-swap="innerHTML"
+      hx-push-url="true"
+      hx-trigger="change, keyup delay:400ms from:#search">
+    <div class="tabs">
+        <label class="tab {% if status == 'unread' %}on{% endif %}">
+            <input type="radio" name="status" value="unread" {% if status == 'unread' %}checked{% endif %}> Non lus
+        </label>
+        <label class="tab {% if status == 'all' %}on{% endif %}">
+            <input type="radio" name="status" value="all" {% if status == 'all' %}checked{% endif %}> Tous
+        </label>
+        <label class="tab {% if status == 'favorites' %}on{% endif %}">
+            <input type="radio" name="status" value="favorites" {% if status == 'favorites' %}checked{% endif %}> Favoris
+        </label>
+    </div>
+    <input id="search" class="search" type="search" name="q" value="{{ q }}" placeholder="Rechercher…">
+    <select name="category_id" class="select">
+        <option value="">Toutes catégories</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if category_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+        {% endfor %}
+    </select>
+    <select name="source_id" class="select">
+        <option value="">Toutes sources</option>
+        {% for s in sources %}
+        <option value="{{ s.id }}" {% if source_id == s.id %}selected{% endif %}>{{ s.title }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<div id="article-list">
+    {% include "partials/article_list.html" %}
+</div>
+{% endblock %}

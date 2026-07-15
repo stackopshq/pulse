@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% set active = 'articles' %}
+{% block title %}{{ article.title }} — Pulse{% endblock %}
+{% block content %}
+<p><a class="muted" href="/articles">← Retour aux articles</a></p>
+<article class="reader">
+    <div class="card-meta">
+        <span class="src">{{ source.title if source else "" }}</span>
+        <span class="dot">·</span>
+        <span class="muted">{{ article.published_at | timeago }}</span>
+        {% if article.author %}<span class="dot">·</span><span class="muted">{{ article.author }}</span>{% endif %}
+    </div>
+    <h1>{{ article.title }}</h1>
+    <div class="reader-actions">
+        {% if article.url %}<a class="btn btn-primary" href="{{ article.url }}" target="_blank" rel="noopener">Ouvrir l'original ↗</a>{% endif %}
+        <button class="btn btn-ghost {% if state.is_favorite %}fav-on{% endif %}"
+                hx-post="/articles/{{ article.id }}/favorite"
+                hx-swap="none">★ Favori</button>
+    </div>
+    <div class="reader-body">
+        {{ (article.content or article.summary or "") | safe }}
+    </div>
+</article>
+{% endblock %}

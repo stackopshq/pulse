@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Pulse{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+</head>
+<body>
+{% if user %}
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-dot"></span> Pulse
+        </div>
+        <nav>
+            <a href="/articles" class="{% if active == 'articles' %}active{% endif %}">Articles</a>
+            <a href="/articles?status=favorites" class="{% if active == 'favorites' %}active{% endif %}">Favoris</a>
+            <a href="/sources" class="{% if active == 'sources' %}active{% endif %}">Sources</a>
+            <a href="/categories" class="{% if active == 'categories' %}active{% endif %}">Catégories</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-chip">{{ user.name }}</div>
+            <form action="/logout" method="post">
+                <button type="submit" class="link-btn">Déconnexion</button>
+            </form>
+        </div>
+    </aside>
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+</div>
+{% else %}
+    {% block auth %}{% endblock %}
+{% endif %}
+</body>
+</html>

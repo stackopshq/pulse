@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Créer un compte — Pulse{% endblock %}
+{% block auth %}
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="brand brand-lg"><span class="brand-dot"></span> Pulse</div>
+        <p class="muted">Créer un compte</p>
+        {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+        <form action="/register" method="post">
+            <label>Nom
+                <input type="text" name="name" required autofocus>
+            </label>
+            <label>Adresse e-mail
+                <input type="email" name="email" required>
+            </label>
+            <label>Mot de passe (8 caractères min.)
+                <input type="password" name="password" required minlength="8">
+            </label>
+            <button type="submit" class="btn btn-primary">Créer le compte</button>
+        </form>
+        <p class="muted small">Déjà un compte ? <a href="/login">Se connecter</a></p>
+    </div>
+</div>
+{% endblock %}

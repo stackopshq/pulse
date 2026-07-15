@@ -1,0 +1,26 @@
+{% set qs %}status={{ status }}{% if category_id %}&category_id={{ category_id }}{% endif %}{% if source_id %}&source_id={{ source_id }}{% endif %}{% if q %}&q={{ q | urlencode }}{% endif %}{% endset %}
+{% if articles %}
+<div class="cards">
+    {% for item in articles %}
+        {% include "partials/article_card.html" %}
+    {% endfor %}
+</div>
+<div class="pager">
+    {% if page > 1 %}
+    <a class="btn btn-ghost"
+       hx-get="/articles?{{ qs }}&page={{ page - 1 }}"
+       hx-target="#article-list" hx-push-url="true" href="/articles?{{ qs }}&page={{ page - 1 }}">Précédent</a>
+    {% endif %}
+    <span class="muted small">Page {{ page }}</span>
+    {% if has_next %}
+    <a class="btn btn-ghost"
+       hx-get="/articles?{{ qs }}&page={{ page + 1 }}"
+       hx-target="#article-list" hx-push-url="true" href="/articles?{{ qs }}&page={{ page + 1 }}">Suivant</a>
+    {% endif %}
+</div>
+{% else %}
+<div class="empty">
+    <p>Aucun article à afficher.</p>
+    <p class="muted small">Ajoutez des sources ou lancez une collecte depuis l'onglet <a href="/sources">Sources</a>.</p>
+</div>
+{% endif %}
