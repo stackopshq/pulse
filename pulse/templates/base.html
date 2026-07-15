@@ -17,6 +17,13 @@
         <nav>
             <a href="/articles" class="{% if active == 'articles' %}active{% endif %}">Articles</a>
             <a href="/articles?status=favorites" class="{% if active == 'favorites' %}active{% endif %}">Favoris</a>
+            {% set alert_count = recent_alert_count() %}
+            <a href="/alerts" class="{% if active == 'alerts' %}active{% endif %}">
+                Alertes {% if alert_count %}<span class="badge">{{ alert_count }}</span>{% endif %}
+            </a>
+            <a href="/rules" class="{% if active == 'rules' %}active{% endif %}">Règles</a>
+            <a href="/digest" class="{% if active == 'digest' %}active{% endif %}">Digest</a>
+            <hr class="nav-sep">
             <a href="/sources" class="{% if active == 'sources' %}active{% endif %}">Sources</a>
             <a href="/categories" class="{% if active == 'categories' %}active{% endif %}">Catégories</a>
         </nav>

@@ -16,6 +16,7 @@ import feedparser
 import httpx
 from sqlmodel import Session, select
 
+from .alerts import evaluate_rules
 from .config import settings
 from .db import engine
 from .models import Article, Source
@@ -86,21 +87,22 @@ def fetch_source(source: Source) -> dict:
     return result
 
 
-def _store_result(session: Session, source: Source, result: dict) -> int:
+def _store_result(session: Session, source: Source, result: dict) -> list[int]:
+    """Enregistre les nouveaux articles. Retourne leurs identifiants."""
     source.last_fetched_at = datetime.now(timezone.utc)
 
     if result["status"] == "error":
         source.last_error = (result["error"] or "erreur inconnue")[:500]
         session.add(source)
         session.commit()
-        return 0
+        return []
 
     source.last_error = None
     if result["status"] == "ok":
         source.etag = result.get("etag")
         source.last_modified = result.get("last_modified")
 
-    new_count = 0
+    new_articles: list[Article] = []
     for entry in result["entries"]:
         guid = _entry_guid(entry)
         if not guid:
@@ -110,23 +112,22 @@ def _store_result(session: Session, source: Source, result: dict) -> int:
         ).first()
         if exists:
             continue
-        session.add(
-            Article(
-                source_id=source.id,
-                guid=guid,
-                title=(entry.get("title") or "(sans titre)")[:500],
-                url=entry.get("link"),
-                author=entry.get("author"),
-                summary=entry.get("summary"),
-                content=_extract_content(entry),
-                published_at=_parse_date(entry),
-            )
+        article = Article(
+            source_id=source.id,
+            guid=guid,
+            title=(entry.get("title") or "(sans titre)")[:500],
+            url=entry.get("link"),
+            author=entry.get("author"),
+            summary=entry.get("summary"),
+            content=_extract_content(entry),
+            published_at=_parse_date(entry),
         )
-        new_count += 1
+        session.add(article)
+        new_articles.append(article)
 
     session.add(source)
     session.commit()
-    return new_count
+    return [a.id for a in new_articles]
 
 
 def collect_all() -> dict:
@@ -142,6 +143,7 @@ def collect_all() -> dict:
         fetched = list(pool.map(fetch_source, sources))
 
     total_new = 0
+    all_new_ids: list[int] = []
     detail: dict[str, int] = {}
     with Session(engine) as session:
         by_id = {s.id: s for s in session.exec(select(Source)).all()}
@@ -149,12 +151,20 @@ def collect_all() -> dict:
             source = by_id.get(result["source_id"])
             if source is None:
                 continue
-            count = _store_result(session, source, result)
-            total_new += count
-            detail[source.feed_url] = count
+            new_ids = _store_result(session, source, result)
+            total_new += len(new_ids)
+            all_new_ids.extend(new_ids)
+            detail[source.feed_url] = len(new_ids)
+
+        alerts = evaluate_rules(session, all_new_ids)
 
     logger.info("Collecte : %s nouveaux articles sur %s sources", total_new, len(sources))
-    return {"sources": len(sources), "new_articles": total_new, "detail": detail}
+    return {
+        "sources": len(sources),
+        "new_articles": total_new,
+        "alerts": alerts,
+        "detail": detail,
+    }
 
 
 def collect_one(source_id: int) -> int:
@@ -164,4 +174,6 @@ def collect_one(source_id: int) -> int:
         if source is None:
             return 0
         result = fetch_source(source)
-        return _store_result(session, source, result)
+        new_ids = _store_result(session, source, result)
+        evaluate_rules(session, new_ids)
+        return len(new_ids)

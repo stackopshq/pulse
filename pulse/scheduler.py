@@ -4,6 +4,7 @@ import asyncio
 import logging
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from .config import settings
 from .feeds import collect_all
@@ -19,6 +20,20 @@ async def _collect_job() -> None:
     await asyncio.to_thread(collect_all)
 
 
+def _run_digest() -> None:
+    from sqlmodel import Session
+
+    from .db import engine
+    from .digest import generate_and_send
+
+    with Session(engine) as session:
+        generate_and_send(session)
+
+
+async def _digest_job() -> None:
+    await asyncio.to_thread(_run_digest)
+
+
 def start_scheduler() -> None:
     if scheduler.running:
         return
@@ -31,6 +46,24 @@ def start_scheduler() -> None:
         coalesce=True,
         max_instances=1,
     )
+
+    if settings.digest_enabled:
+        if settings.digest_period == "week":
+            trigger = CronTrigger(day_of_week="mon", hour=settings.digest_hour, minute=0)
+        else:
+            trigger = CronTrigger(hour=settings.digest_hour, minute=0)
+        scheduler.add_job(
+            _digest_job,
+            trigger=trigger,
+            id="digest",
+            replace_existing=True,
+            coalesce=True,
+            max_instances=1,
+        )
+        logger.info(
+            "Digest planifié (%s à %sh)", settings.digest_period, settings.digest_hour
+        )
+
     scheduler.start()
     logger.info(
         "Scheduler démarré (collecte toutes les %s min)",

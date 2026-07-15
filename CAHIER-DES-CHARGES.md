@@ -38,12 +38,13 @@ newsletters par un point d'entrée unique, self-hosted, contrôlé par l'équipe
   recherche plein texte.
 - **Import/export OPML** : reprendre une liste de flux existante.
 
-### 2.2 v0.2
-- **Alertes mots-clés** : règles (ex. `CVE`, nom d'une techno) qui taguent ou
-  notifient automatiquement les articles correspondants.
-- **Digests** : résumé périodique (quotidien/hebdo) en Markdown et/ou email.
+### 2.2 v0.2 (livré)
+- **Alertes mots-clés** : règles de veille (ex. `CVE`, nom d'une techno) qui
+  déclenchent une alerte sur chaque article correspondant. Vue dédiée + badge.
+- **Digests** : résumé périodique (quotidien/hebdo) des nouveaux articles et
+  alertes, en aperçu web, export Markdown, CLI et email (SMTP optionnel).
 - **Catégories thématiques préconfigurées** : Sécurité/CVE, Cloud, DevOps,
-  Langages, Réseau…
+  Langages, Réseau, IA/Data, Général (seed au démarrage).
 
 ### 2.3 Backlog / plus tard
 - Rôles et permissions (admin / lecteur), gestion d'équipe fine.

@@ -69,6 +69,21 @@ a:hover { text-decoration: underline; }
 .sidebar nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
 .sidebar nav a.active { background: rgba(99, 102, 241, 0.14); color: var(--accent-2); }
 
+.sidebar nav a { display: flex; align-items: center; justify-content: space-between; }
+.nav-sep { border: none; border-top: 1px solid var(--border); margin: 10px 4px; }
+.badge {
+    background: var(--danger); color: white; font-size: 11px; font-weight: 700;
+    min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* Digest */
+.digest-section { margin-bottom: 28px; }
+.digest-section h2 { font-size: 17px; letter-spacing: -0.01em; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.digest-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.digest-list li { display: flex; align-items: center; gap: 10px; }
+.digest-list li a { font-weight: 500; }
+
 .sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
 .user-chip { font-weight: 600; margin-bottom: 6px; }
 

@@ -15,6 +15,10 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("collect", help="Lance une collecte immédiate des flux")
 
+    digest = sub.add_parser("digest", help="Génère le digest (Markdown sur stdout)")
+    digest.add_argument("--period", choices=["day", "week"], default="day")
+    digest.add_argument("--send", action="store_true", help="Envoie le digest par email")
+
     createuser = sub.add_parser("createuser", help="Crée un utilisateur")
     createuser.add_argument("--email", required=True)
     createuser.add_argument("--name", required=True)
@@ -36,6 +40,27 @@ def main(argv: list[str] | None = None) -> int:
         init_db()
         result = collect_all()
         print(f"{result['new_articles']} nouveaux articles sur {result['sources']} sources.")
+        return 0
+
+    if args.command == "digest":
+        from datetime import datetime, timezone
+
+        from sqlmodel import Session
+
+        from .db import engine, init_db
+        from .digest import build_digest, period_delta, render_markdown, send_digest_email
+
+        init_db()
+        since = datetime.now(timezone.utc) - period_delta(args.period)
+        with Session(engine) as session:
+            data = build_digest(session, since)
+            markdown = render_markdown(data)
+        if args.send:
+            subject = f"Digest Pulse — {data['total_new']} article(s)"
+            ok = send_digest_email(subject, markdown)
+            print("Digest envoyé." if ok else "Envoi impossible (SMTP non configuré ?).")
+        else:
+            print(markdown)
         return 0
 
     if args.command == "createuser":

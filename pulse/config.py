@@ -21,6 +21,18 @@ class Settings(BaseSettings):
     request_timeout: float = 15.0
     max_concurrent_fetches: int = 8
 
+    # Digest périodique par email (optionnel).
+    digest_enabled: bool = False
+    digest_period: str = "day"  # "day" ou "week"
+    digest_hour: int = 8  # heure d'envoi (0-23)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_starttls: bool = True
+    digest_from: str = ""
+    digest_to: str = ""  # destinataires séparés par des virgules
+
     debug: bool = False
 
 

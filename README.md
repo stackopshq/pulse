@@ -7,8 +7,9 @@ offre une interface web pour lire, filtrer, catégoriser et suivre sa veille en
 équipe. Les sources et catégories sont partagées ; l'état de lecture (lu/non-lu,
 favoris) est propre à chaque utilisateur.
 
-## Fonctionnalités (v0.1)
+## Fonctionnalités
 
+**v0.1 — MVP**
 - Authentification multi-utilisateur (sessions par cookie, mots de passe hachés).
 - Gestion des sources RSS/Atom, organisées par catégories partagées.
 - Collecte périodique et robuste (collecte conditionnelle `ETag`/`Last-Modified`,
@@ -17,8 +18,14 @@ favoris) est propre à chaque utilisateur.
 - Filtres par statut, catégorie, source et recherche plein texte.
 - Import / export OPML.
 
+**v0.2 — Alertes & digests**
+- Règles de veille par mots-clés (ex. `CVE`, `kubernetes`) : chaque article
+  correspondant déclenche une alerte, visible dans une vue dédiée avec badge.
+- Digest périodique (jour / semaine) des nouveaux articles et alertes :
+  aperçu web, export Markdown, CLI et envoi par email (SMTP optionnel).
+
 Voir [`CAHIER-DES-CHARGES.md`](CAHIER-DES-CHARGES.md) pour le périmètre complet
-et la feuille de route (alertes mots-clés, digests, notifications…).
+et la feuille de route (notifications Slack, résumés LLM, sources non-RSS…).
 
 ## Stack
 
@@ -58,6 +65,7 @@ pulse serve --reload
 ```bash
 pulse serve [--host --port --reload]   # démarre le serveur web
 pulse collect                          # lance une collecte immédiate
+pulse digest [--period day|week] [--send]   # génère (ou envoie) le digest
 pulse createuser --email … --name … --password … [--admin]
 ```
 

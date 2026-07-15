@@ -12,7 +12,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from .config import settings
 from .db import init_db
 from .deps import RedirectException, redirect_exception_handler
-from .routes import articles, auth, categories, sources
+from .routes import alerts, articles, auth, categories, digest, rules, sources
 from .scheduler import shutdown_scheduler, start_scheduler
 from .seed import seed_default_categories
 
@@ -48,6 +48,9 @@ app.include_router(auth.router)
 app.include_router(articles.router)
 app.include_router(sources.router)
 app.include_router(categories.router)
+app.include_router(rules.router)
+app.include_router(alerts.router)
+app.include_router(digest.router)
 
 
 @app.get("/", include_in_schema=False)

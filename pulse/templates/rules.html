@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% set active = 'rules' %}
+{% block title %}Règles de veille — Pulse{% endblock %}
+{% block content %}
+<header class="page-head"><h1>Règles de veille</h1></header>
+<p class="muted">Chaque article contenant l'un des mots-clés déclenche une alerte. Séparez les mots-clés par des virgules.</p>
+
+<form action="/rules" method="post" class="add-source">
+    <input type="text" name="name" placeholder="Nom (ex. Failles critiques)" required>
+    <input type="text" name="keywords" placeholder="Mots-clés (ex. CVE, RCE, zero-day)" required>
+    <button type="submit" class="btn btn-primary">Créer</button>
+</form>
+
+{% if rules %}
+<table class="table">
+    <thead><tr><th>Règle</th><th>Mots-clés</th><th>Alertes</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rules %}
+        <tr class="{% if not r.is_active %}inactive{% endif %}">
+            <td class="src-title">{{ r.name }}</td>
+            <td>
+                {% for kw in r.keywords.split(',') %}
+                    <span class="tag" style="--tag:#6366f1">{{ kw.strip() }}</span>
+                {% endfor %}
+            </td>
+            <td><a href="/alerts?rule_id={{ r.id }}">{{ counts.get(r.id, 0) }}</a></td>
+            <td class="row-actions">
+                <form action="/rules/{{ r.id }}/toggle" method="post" class="inline">
+                    <button class="link-btn">{% if r.is_active %}Désactiver{% else %}Activer{% endif %}</button>
+                </form>
+                <form action="/rules/{{ r.id }}/delete" method="post" class="inline"
+                      onsubmit="return confirm('Supprimer cette règle et ses alertes ?')">
+                    <button class="link-btn danger">Supprimer</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty"><p>Aucune règle. Créez-en une pour surveiller des mots-clés.</p></div>
+{% endif %}
+{% endblock %}

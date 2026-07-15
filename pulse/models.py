@@ -73,3 +73,24 @@ class ArticleState(SQLModel, table=True):
     is_read: bool = False
     is_favorite: bool = False
     updated_at: datetime = Field(default_factory=utcnow)
+
+
+class Rule(SQLModel, table=True):
+    """Veille par mots-clés : chaque article contenant l'un des termes déclenche
+    une alerte. Les mots-clés sont stockés en liste séparée par des virgules."""
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    keywords: str  # ex. "CVE, kubernetes, log4j"
+    is_active: bool = True
+    notify: bool = True  # inclure les hits dans les digests
+    created_at: datetime = Field(default_factory=utcnow)
+
+
+class AlertHit(SQLModel, table=True):
+    __table_args__ = (UniqueConstraint("rule_id", "article_id", name="uq_hit_rule_article"),)
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    rule_id: int = Field(foreign_key="rule.id", index=True)
+    article_id: int = Field(foreign_key="article.id", index=True)
+    created_at: datetime = Field(default_factory=utcnow, index=True)

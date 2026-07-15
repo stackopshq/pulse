@@ -48,13 +48,13 @@ def test_store_result_dedup(session):
         {"id": "g2", "title": "Article 2", "link": "http://x/2"},
     ]
     added = _store_result(session, source, _make_result(source.id, entries))
-    assert added == 2
+    assert len(added) == 2
     assert source.etag == '"e1"'
     assert source.last_error is None
 
     # Deuxième passage : mêmes GUID -> aucun nouvel article.
     again = _store_result(session, source, _make_result(source.id, entries))
-    assert again == 0
+    assert again == []
 
     total = session.exec(select(Article).where(Article.source_id == source.id)).all()
     assert len(total) == 2
@@ -75,6 +75,6 @@ def test_store_result_error_sets_last_error(session):
         "error": "timeout",
     }
     added = _store_result(session, source, result)
-    assert added == 0
+    assert added == []
     assert source.last_error == "timeout"
     assert source.last_fetched_at is not None

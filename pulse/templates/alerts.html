@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% set active = 'alerts' %}
+{% block title %}Alertes — Pulse{% endblock %}
+{% block content %}
+<header class="page-head">
+    <h1>Alertes</h1>
+    <div class="head-actions">
+        <select class="select" onchange="location.href = this.value">
+            <option value="/alerts" {% if not rule_id %}selected{% endif %}>Toutes les règles</option>
+            {% for r in rules %}
+            <option value="/alerts?rule_id={{ r.id }}" {% if rule_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</header>
+
+{% if hits %}
+<div class="cards">
+    {% for h in hits %}
+    <article class="card">
+        <div class="card-main">
+            <div class="card-meta">
+                <span class="tag" style="--tag:#ef4444">{{ h.rule.name }}</span>
+                <span class="src">{{ h.source.title }}</span>
+                <span class="dot">·</span>
+                <span class="muted">{{ h.hit.created_at | timeago }}</span>
+            </div>
+            <a class="card-title" href="/articles/{{ h.article.id }}">{{ h.article.title }}</a>
+            {% if h.article.summary %}
+            <p class="card-summary">{{ h.article.summary | striptags | truncate(220) }}</p>
+            {% endif %}
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+    <p>Aucune alerte pour l'instant.</p>
+    <p class="muted small">Définissez des règles dans l'onglet <a href="/rules">Règles</a>.</p>
+</div>
+{% endif %}
+{% endblock %}

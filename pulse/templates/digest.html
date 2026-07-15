@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% set active = 'digest' %}
+{% block title %}Digest — Pulse{% endblock %}
+{% block content %}
+<header class="page-head">
+    <h1>Digest</h1>
+    <div class="head-actions">
+        <div class="tabs">
+            <a class="tab {% if period == 'day' %}on{% endif %}" href="/digest?period=day">Jour</a>
+            <a class="tab {% if period == 'week' %}on{% endif %}" href="/digest?period=week">Semaine</a>
+        </div>
+        <a class="btn btn-ghost" href="/digest.md?period={{ period }}">Exporter .md</a>
+    </div>
+</header>
+
+<p class="muted">
+    Du {{ data.since.strftime('%d/%m/%Y %H:%M') }} au {{ data.until.strftime('%d/%m/%Y %H:%M') }} —
+    {{ data.total_new }} nouvel(s) article(s).
+</p>
+
+{% if data.alerts %}
+<section class="digest-section">
+    <h2>Alertes ({{ data.alerts | length }})</h2>
+    <ul class="digest-list">
+        {% for item in data.alerts %}
+        <li>
+            <span class="tag" style="--tag:#ef4444">{{ item.rule.name }}</span>
+            <a href="/articles/{{ item.article.id }}">{{ item.article.title }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
+{% for group in data.groups %}
+<section class="digest-section">
+    <h2>{{ group.category }} ({{ group.articles | length }})</h2>
+    <ul class="digest-list">
+        {% for article in group.articles %}
+        <li>
+            <a href="/articles/{{ article.id }}">{{ article.title }}</a>
+            <span class="muted small">{{ data.sources.get(article.source_id).title if data.sources.get(article.source_id) else '' }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endfor %}
+
+{% if not data.groups and not data.alerts %}
+<div class="empty"><p>Aucune nouveauté sur la période.</p></div>
+{% endif %}
+{% endblock %}

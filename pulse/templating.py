@@ -31,3 +31,23 @@ def _timeago(value: datetime | None) -> str:
 
 
 templates.env.filters["timeago"] = _timeago
+
+
+def _recent_alert_count() -> int:
+    """Nombre d'alertes déclenchées sur les 7 derniers jours (badge de nav)."""
+    from datetime import timedelta
+
+    from sqlalchemy import func
+    from sqlmodel import Session, select
+
+    from .db import engine
+    from .models import AlertHit
+
+    since = datetime.now(timezone.utc) - timedelta(days=7)
+    with Session(engine) as session:
+        return session.exec(
+            select(func.count()).select_from(AlertHit).where(AlertHit.created_at >= since)
+        ).one()
+
+
+templates.env.globals["recent_alert_count"] = _recent_alert_count
