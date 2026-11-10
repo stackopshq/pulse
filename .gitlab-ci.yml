@@ -1,0 +1,43 @@
+# Merge request checks on GitLab, where the code now lives (moved from Gitea on
+# 2026-11-10). GitHub stays a public mirror pushed from here, and publishing
+# (releases, registries) stays on GitHub Actions there: this pipeline only
+# checks, and never publishes.
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # No branch pipeline on top of an MR pipeline for the same commit.
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
+stages:
+  - verify
+  - security
+
+default:
+  tags: [linux]
+  interruptible: true
+  timeout: 20m
+
+tests:
+  stage: verify
+  image: ghcr.io/astral-sh/uv:0.11.8-python3.12-trixie
+  variables:
+    UV_CACHE_DIR: /tmp/uv-cache
+  script:
+    - uv pip install --system -e ".[dev]"
+    - pytest -q
+
+gitleaks:
+  stage: security
+  needs: []
+  image:
+    name: ghcr.io/gitleaks/gitleaks:v8.30.1
+    entrypoint: [""]
+  variables:
+    # Full history: the scan covers every commit, not the tip.
+    GIT_DEPTH: 0
+  script:
+    - gitleaks detect --source . --no-banner --redact --exit-code 1
